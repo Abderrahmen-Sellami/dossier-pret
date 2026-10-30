@@ -1,0 +1,553 @@
+<title>Dossier Prêt</title>
+<meta name="author" content="Abderrahmen Sellami">
+<meta name="copyright" content="© 2026 Abderrahmen Sellami. Tous droits réservés.">
+<!-- © 2026 Abderrahmen Sellami (github.com/Abderrahmen-Sellami). Tous droits réservés. Aucune licence n'est accordée. -->
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Naskh+Arabic:wght@500;700&display=swap">
+<style>
+/* Layout : bandeau officiel, onglets, deux colonnes (dossier à gauche, workflow collant à droite), une colonne sur mobile */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --sunk:#E9EDF1; --line:#D3DAE2;
+  --ink:#132235; --muted:#55657A; --accent:#1D4E89; --accent-soft:#DCE7F4;
+  --block:#B3261E; --block-soft:#F8E1DF; --warn:#9A5B00; --warn-soft:#FBEBD0;
+  --ok:#1F6F50; --ok-soft:#DDF1E7;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --f-ar:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E141B; --surface:#151D27; --sunk:#1B2532; --line:#2B3848;
+  --ink:#E5EAF0; --muted:#97A6B8; --accent:#86AEE6; --accent-soft:#1E3352;
+  --block:#FF8378; --block-soft:#3A1D1B; --warn:#F2B552; --warn-soft:#3A2B12;
+  --ok:#62C79F; --ok-soft:#14322A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E141B; --surface:#151D27; --sunk:#1B2532; --line:#2B3848;
+  --ink:#E5EAF0; --muted:#97A6B8; --accent:#86AEE6; --accent-soft:#1E3352;
+  --block:#FF8378; --block-soft:#3A1D1B; --warn:#F2B552; --warn-soft:#3A2B12;
+  --ok:#62C79F; --ok-soft:#14322A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--accent);color:var(--bg)}
+:root[data-theme="dark"] header.band, header.band{color:var(--surface)}
+.band .wrap{padding-block:22px 18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.brand h1{margin:0;font:800 clamp(28px,5vw,40px)/1 var(--f-display);font-stretch:85%;letter-spacing:-.01em}
+.brand h1 .ar{font-family:var(--f-ar);font-weight:700;font-size:.72em;margin-inline-start:.4em;opacity:.85}
+.brand p{margin:6px 0 0;max-width:60ch;opacity:.9;font-size:15px}
+.tag{font:600 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;padding:6px 8px;border-radius:3px;opacity:.85}
+nav.tabs{border-bottom:1px solid var(--line);background:var(--surface)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+nav.tabs button{font:600 15px var(--f-body);color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:14px 12px 11px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main .wrap{padding-block:24px 48px}
+h2{font:700 20px/1.2 var(--f-display);font-stretch:90%;margin:0 0 4px;text-wrap:balance}
+h3{font:700 16px/1.25 var(--f-body);margin:0}
+.lead{color:var(--muted);margin:0 0 16px;max-width:65ch}
+.eyebrow{font:600 11px/1 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px}
+.sticky{position:sticky;top:12px}
+@media (max-width:900px){.sticky{position:static}}
+
+.demarches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+@media (max-width:560px){.demarches{grid-template-columns:minmax(0,1fr)}}
+.dem{text-align:left;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:12px;cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:4px}
+.dem b{font:700 15px var(--f-body)}
+.dem small{color:var(--muted);font-size:13px}
+.dem[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{font:600 14px var(--f-body);border-radius:4px;padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.primary:disabled{opacity:.55;cursor:wait}
+.btn.ghost{background:transparent}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 12px;margin-top:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+label.f input,label.f select{font:15px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%;min-width:0}
+input.ar{font-family:var(--f-ar);direction:rtl}
+.piece{border:1px solid var(--line);border-radius:5px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
+.piece.missing{background:var(--sunk);border-style:dashed}
+.piece-head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.piece-head .src{font:12px var(--f-mono);color:var(--muted)}
+.piece-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.piece-actions input[type=file]{font-size:12px;max-width:210px;color:var(--muted)}
+.chip{font:600 11px/1 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;padding:5px 7px;border-radius:3px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.block{background:var(--block-soft);color:var(--block)}
+.chip.neutral{background:var(--sunk);color:var(--muted)}
+.pieces{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.ocr{font:12px var(--f-mono);color:var(--muted);margin-top:6px}
+
+/* Workflow stepper */
+.steps{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column}
+.steps li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;position:relative}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:13px;top:33px;bottom:-7px;width:2px;background:var(--line)}
+.node{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;font:600 12px var(--f-mono);color:var(--muted);position:relative;z-index:1;transition:background .25s,border-color .25s}
+.steps li.run .node{border-color:var(--accent);color:var(--accent);animation:pulse 1s infinite}
+.steps li.done .node{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.steps li.done.has-block .node{background:var(--block);border-color:var(--block)}
+.steps li.done.has-warn .node{background:var(--warn);border-color:var(--warn)}
+.steps .t{font-weight:600;font-size:14px}
+.steps .d{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+@keyframes pulse{50%{box-shadow:0 0 0 5px var(--accent-soft)}}
+@media (prefers-reduced-motion:reduce){.steps li.run .node{animation:none}}
+.log{margin-top:14px;background:var(--sunk);border-radius:4px;padding:10px 12px;font:12px/1.6 var(--f-mono);max-height:190px;overflow:auto;color:var(--muted)}
+.log div b{color:var(--ink);font-weight:600}
+.log .e-block{color:var(--block)} .log .e-warn{color:var(--warn)} .log .e-ok{color:var(--ok)}
+
+/* Rapport */
+.verdict{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.stamp{font:800 15px/1.05 var(--f-display);font-stretch:80%;letter-spacing:.06em;text-transform:uppercase;border:3px double currentColor;border-radius:6px;padding:10px 14px;transform:rotate(-3deg);text-align:center}
+.stamp.ok{color:var(--ok)} .stamp.block{color:var(--block)} .stamp.warn{color:var(--warn)}
+.stamp small{display:block;font:600 10px var(--f-mono);letter-spacing:.08em;margin-top:4px}
+.score{font:700 34px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.score span{font-size:14px;color:var(--muted);font-family:var(--f-body);font-weight:400;display:block;margin-top:4px}
+.issues{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.issues li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;padding:10px;border-radius:4px;background:var(--sunk)}
+.issues .msg{font-size:14px}
+.issues .act{font-size:13px;color:var(--muted);margin-top:2px}
+.sub{margin-top:18px}
+.msgbox{white-space:pre-wrap;background:var(--sunk);border-radius:4px;padding:12px;font-size:14px;margin-top:8px}
+.rem{list-style:none;padding:0;margin:8px 0 0;font-size:14px}
+.rem li{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.rem li span:first-child{font:600 12px var(--f-mono);color:var(--accent);min-width:88px;font-variant-numeric:tabular-nums;padding-top:2px}
+.empty{color:var(--muted);font-size:14px;margin:12px 0 0}
+
+/* Guichet */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+.kpi b{display:block;font:700 28px/1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:6px}
+.tablewrap{overflow-x:auto;margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:13px}
+tr.new td{background:var(--accent-soft)}
+
+/* Fonctionnement */
+.how{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+@media (max-width:900px){.how{grid-template-columns:minmax(0,1fr)}}
+.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;overflow-x:auto;margin:0}
+.prose p,.prose li{max-width:65ch}
+.prose ul{padding-left:20px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+footer .wrap{padding-block:16px 28px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Dossier Prêt<span class="ar">ملف جاهز</span></h1>
+      <p>Le pré-contrôle automatique de votre dossier administratif, avant le passage au guichet. Les processus existants restent en place : on ajoute une couche de vérification par-dessus.</p>
+    </div>
+    <span class="tag">Prototype · institutions simulées</span>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Vues">
+  <div class="wrap" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="citoyen" id="tab-citoyen">Espace citoyen</button>
+    <button role="tab" aria-selected="false" data-tab="guichet" id="tab-guichet">Vue guichet</button>
+    <button role="tab" aria-selected="false" data-tab="fonctionnement" id="tab-fonctionnement">Fonctionnement du workflow</button>
+  </div>
+</nav>
+
+<main>
+<!-- ============ CITOYEN ============ -->
+<section class="wrap" data-view="citoyen">
+  <div class="grid">
+    <div class="col">
+      <div class="panel">
+        <span class="eyebrow">Étape 1</span>
+        <h2>Choisir la démarche</h2>
+        <div class="demarches" id="demarches"></div>
+        <div class="toolbar">
+          <button class="btn" id="load-bad">Exemple avec erreurs</button>
+          <button class="btn" id="load-good">Exemple corrigé</button>
+          <button class="btn ghost" id="load-empty">Dossier vide</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <span class="eyebrow">Étape 2</span>
+        <h2>Identité de référence</h2>
+        <p class="lead">Ces informations servent de référence pour comparer toutes les pièces entre elles.</p>
+        <div class="fields">
+          <label class="f">Nom (latin)<input id="p-nom" autocomplete="off"></label>
+          <label class="f">Nom (arabe)<input id="p-nomar" class="ar" autocomplete="off"></label>
+          <label class="f">Prénom<input id="p-prenom" autocomplete="off"></label>
+          <label class="f">Date de naissance<input id="p-naissance" type="date"></label>
+          <label class="f">N° CIN (fictif)<input id="p-cin" inputmode="numeric" autocomplete="off"></label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <span class="eyebrow">Étape 3</span>
+        <h2>Pièces du dossier</h2>
+        <p class="lead" id="pieces-lead"></p>
+        <div class="pieces" id="pieces"></div>
+      </div>
+    </div>
+
+    <div class="col sticky">
+      <div class="panel">
+        <span class="eyebrow">Étape 4 · automatisation</span>
+        <h2>Lancer le pré-contrôle</h2>
+        <p class="lead" style="margin-bottom:10px">Le workflow enchaîne sept étapes, sans intervention humaine.</p>
+        <button class="btn primary" id="run">Lancer le pré-contrôle</button>
+        <ol class="steps" id="steps"></ol>
+        <div class="log" id="log" aria-live="polite"><div>En attente d'un dépôt de dossier…</div></div>
+      </div>
+      <div class="panel" id="report"><span class="eyebrow">Rapport</span><h2>Résultat du dossier</h2><p class="empty">Le rapport apparaît ici à la fin du workflow.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GUICHET ============ -->
+<section class="wrap" data-view="guichet" hidden>
+  <h2>File d'attente du guichet</h2>
+  <p class="lead">Ce que voit l'agent administratif : chaque dossier arrive déjà pré-contrôlé. Les dossiers « à corriger » restent chez le citoyen et n'encombrent plus le guichet.</p>
+  <div class="kpis" id="kpis"></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Réf.</th><th>Citoyen</th><th>Démarche</th><th>Statut</th><th>Points</th><th>Déposé le</th></tr></thead>
+    <tbody id="queue"></tbody>
+  </table></div>
+  <p class="empty">Dossiers d'exemple fictifs. Les dossiers que vous envoyez depuis l'espace citoyen s'ajoutent en tête de liste.</p>
+</section>
+
+<!-- ============ FONCTIONNEMENT ============ -->
+<section class="wrap" data-view="fonctionnement" hidden>
+  <h2>Le workflow automatisé</h2>
+  <p class="lead">Déclencheur : le dépôt d'un dossier. Sortie : une décision « prêt » ou « à corriger », une notification au citoyen et des rappels programmés.</p>
+  <div class="how">
+<pre class="mermaid">
+flowchart TD
+  A["Dépôt du dossier (formulaire + scans)"] --> B["Extraction des champs (OCR)"]
+  B --> C{"Toutes les pièces obligatoires ?"}
+  C -- non --> X["Liste des pièces manquantes"]
+  C -- oui --> D["Contrôle des dates : validité, ancienneté"]
+  D --> E["Cohérence croisée : nom arabe/latin, naissance, CIN"]
+  E --> F["Vérification auprès des institutions (API)"]
+  F --> G{"Points bloquants ?"}
+  X --> H
+  G -- oui --> H["Rapport « à corriger » + SMS / e-mail"]
+  G -- non --> I["Rapport « prêt » + transmission au guichet"]
+  H --> J["Rappels programmés : relance, expirations, date limite"]
+  I --> J
+</pre>
+    <div class="prose">
+      <h3>De la démo à la production</h3>
+      <div class="tablewrap" style="margin-top:10px"><table style="min-width:520px">
+        <thead><tr><th>Étape</th><th>Dans ce prototype</th><th>En production</th></tr></thead>
+        <tbody>
+          <tr><td>Déclencheur</td><td>Bouton « Lancer »</td><td>Webhook du formulaire (n8n, Make)</td></tr>
+          <tr><td>Extraction</td><td>Champs saisis, OCR simulé</td><td>OCR (Tesseract, Google Vision) sur les scans</td></tr>
+          <tr><td>Règles</td><td>Moteur JavaScript</td><td>Nœud « Code » ou micro-service Laravel</td></tr>
+          <tr><td>Institutions</td><td>Réponses simulées</td><td>API via la plateforme d'interopérabilité de l'État</td></tr>
+          <tr><td>Notification</td><td>Message généré</td><td>SMS / e-mail automatique</td></tr>
+          <tr><td>Rappels</td><td>Calendrier calculé</td><td>Tâche planifiée (cron) quotidienne</td></tr>
+        </tbody>
+      </table></div>
+      <h3 style="margin-top:20px">Le problème de la translittération</h3>
+      <p>Un même nom s'écrit différemment selon l'agent qui l'a saisi : Trabelsi, Trablsi, الطرابلسي. Le moteur compare le <b>squelette consonantique</b> du nom, dans les deux écritures. Une variante d'orthographe donne un avertissement ; un nom réellement différent bloque le dossier.</p>
+      <h3 style="margin-top:20px">Limites assumées</h3>
+      <ul>
+        <li>Les règles, délais et montants sont fictifs et paramétrables ; ils doivent être validés avec les textes officiels.</li>
+        <li>Aucune connexion réelle aux systèmes de l'État : la couche institutions est simulée.</li>
+        <li>La décision finale reste à l'agent. L'outil prépare le dossier, il ne remplace pas le guichet.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">© 2026 Abderrahmen Sellami · Tous droits réservés. Concept, règles et code originaux ; toute reproduction ou réutilisation sans autorisation écrite est interdite.<br>Prototype pédagogique · données entièrement fictives · aucune donnée n'est envoyée ni conservée.</div></footer>
+
+<script>
+(function(){
+"use strict";
+const DAY=86400000;
+const T0=new Date(); T0.setHours(12,0,0,0);
+const iso=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
+const rel=n=>iso(T0.getTime()+n*DAY);
+const parse=s=>{if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const d=new Date(s+"T12:00:00");return isNaN(d)?null:d};
+const fmt=s=>{const d=parse(s);return d?String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear():"—"};
+const daysFrom=s=>{const d=parse(s);return d?Math.round((d-T0)/DAY):null};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id);
+
+/* ---------- Comparaison de noms arabe / latin ---------- */
+const AR={"ب":"b","ت":"t","ث":"t","ج":"j","ح":"h","خ":"k","د":"d","ذ":"d","ر":"r","ز":"z","س":"s","ش":"sh","ص":"s","ض":"d","ط":"t","ظ":"z","ع":"","غ":"g","ف":"f","ق":"k","ك":"k","ل":"l","م":"m","ن":"n","ه":"h","ة":"","و":"","ي":"","ى":"","ا":"","أ":"","إ":"","آ":"","ء":"","ئ":"","ؤ":""};
+const isAr=s=>/[؀-ۿ]/.test(s||"");
+function skel(s){
+  s=String(s||"").trim(); if(!s)return "";
+  if(isAr(s)){
+    return s.replace(/[ً-ْـ]/g,"").split(/\s+/).map(w=>w.replace(/^ال/,"")).join("")
+      .split("").map(c=>AR[c]!==undefined?AR[c]:"").join("").replace(/(.)\1+/g,"$1");
+  }
+  s=s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+  s=s.split(/[\s\-']+/).filter(w=>w!=="el"&&w!=="al").map(w=>w.replace(/^(el|al)(?=[a-z]{3,})/,"")).join(" ");
+  s=s.replace(/\b(ben|bin|ibn)\b/g,"bn").replace(/kh/g,"k").replace(/gh/g,"g").replace(/dh/g,"d").replace(/th/g,"t").replace(/dj/g,"j").replace(/ch/g,"sh").replace(/ou/g,"u").replace(/[qc]/g,"k");
+  return s.replace(/[^a-z]/g,"").replace(/[aeiouyw]/g,"").replace(/(.)\1+/g,"$1");
+}
+const exact=s=>String(s||"").normalize("NFD").replace(/[̀-ًͯ-ْ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+function cmpName(val,refs){
+  refs=refs.filter(Boolean);
+  if(refs.some(r=>exact(r)===exact(val)))return "ok";
+  const sv=skel(val);
+  if(sv&&refs.some(r=>skel(r)===sv))return isAr(val)?"ok":"warn";
+  return "block";
+}
+
+/* ---------- Démarches (règles fictives, paramétrables) ---------- */
+const DEM={
+  bourse:{label:"Bourse universitaire",inst:"Office des œuvres universitaires",hint:"Étudiant, 1ʳᵉ demande ou renouvellement",
+    deadline:12,
+    pieces:[
+      {id:"cin",label:"Carte d'identité nationale",src:"Ministère de l'Intérieur",fields:[["nom","Nom"],["prenom","Prénom"],["naissance","Date de naissance","date"],["cin","N° CIN"],["expiration","Expire le","date"]]},
+      {id:"naissance",label:"Extrait de naissance",src:"Municipalité · état civil",maxAge:90,fields:[["nom","Nom (tel qu'écrit)"],["prenom","Prénom"],["naissance","Date de naissance","date"],["emission","Délivré le","date"]]},
+      {id:"inscription",label:"Attestation d'inscription 2026-2027",src:"Université",fields:[["nom","Nom"],["prenom","Prénom"],["naissance","Date de naissance","date"],["etab","Établissement"]]},
+      {id:"revenu",label:"Attestation de revenu des parents",src:"Recette des finances",maxAge:365,fields:[["parent","Nom du parent"],["revenu","Revenu annuel (DT)","number"],["emission","Délivré le","date"]]},
+      {id:"residence",label:"Certificat de résidence",src:"Municipalité",maxAge:90,fields:[["nom","Nom"],["prenom","Prénom"],["adresse","Adresse"],["emission","Délivré le","date"]]}
+    ]},
+  passeport:{label:"Passeport",inst:"Ministère de l'Intérieur",hint:"Première demande ou renouvellement",
+    pieces:[
+      {id:"cin",label:"Carte d'identité nationale",src:"Ministère de l'Intérieur",fields:[["nom","Nom"],["prenom","Prénom"],["naissance","Date de naissance","date"],["cin","N° CIN"],["expiration","Expire le","date"]]},
+      {id:"naissance",label:"Extrait de naissance",src:"Municipalité · état civil",maxAge:90,fields:[["nom","Nom (tel qu'écrit)"],["prenom","Prénom"],["naissance","Date de naissance","date"],["emission","Délivré le","date"]]},
+      {id:"photos",label:"Photos d'identité",src:"Photographe",maxAge:180,fields:[["nombre","Nombre de photos","number"],["fond","Fond","select",["Blanc","Couleur"]],["emission","Prises le","date"]]},
+      {id:"timbre",label:"Timbre fiscal",src:"Recette des finances",fields:[["montant","Montant (DT)","number"],["emission","Acheté le","date"]]},
+      {id:"ancien",label:"Ancien passeport",src:"Ministère de l'Intérieur",optional:true,fields:[["nom","Nom"],["expiration","Expiré le","date"]]}
+    ]},
+  entreprise:{label:"Création de SUARL",inst:"Registre national des entreprises",hint:"Entreprise individuelle à responsabilité limitée",
+    pieces:[
+      {id:"cin",label:"CIN du gérant",src:"Ministère de l'Intérieur",fields:[["nom","Nom"],["prenom","Prénom"],["naissance","Date de naissance","date"],["cin","N° CIN"],["expiration","Expire le","date"]]},
+      {id:"reservation",label:"Réservation de la dénomination",src:"Registre national des entreprises",maxAge:90,fields:[["denom","Dénomination"],["emission","Délivrée le","date"]]},
+      {id:"statuts",label:"Statuts signés",src:"Fondateur",fields:[["denom","Dénomination"],["nom","Nom du gérant"],["capital","Capital (DT)","number"],["emission","Signés le","date"]]},
+      {id:"bail",label:"Contrat de bail ou domiciliation",src:"Bailleur",fields:[["adresse","Adresse du siège"],["duree","Durée (mois)","number"],["emission","Signé le","date"]]}
+    ]}
+};
+const RULES={ /* paramètres fictifs */
+  plafondRevenu:15000, tarifPasseport:80, photosRequises:2, bailMin:12
+};
+
+/* ---------- Jeux d'exemples ---------- */
+const PROFILE={nom:"Trabelsi",nomar:"الطرابلسي",prenom:"Mohamed Amine",naissance:"2005-03-14",cin:"09871234"};
+function sample(dem,v){
+  const bad=v==="bad",P=PROFILE;
+  const cin={provided:true,values:{nom:P.nom,prenom:P.prenom,naissance:P.naissance,cin:P.cin,expiration:bad?rel(20):rel(900)}};
+  if(dem==="bourse")return{
+    cin,
+    naissance:{provided:true,values:{nom:"الطرابلسي",prenom:"محمد أمين",naissance:P.naissance,emission:bad?rel(-150):rel(-10)}},
+    inscription:{provided:true,values:{nom:bad?"Trablsi":"Trabelsi",prenom:P.prenom,naissance:bad?"2005-04-14":P.naissance,etab:"ESSECT, Tunis"}},
+    revenu:{provided:!bad,values:bad?{}:{parent:"Trabelsi Hédi",revenu:9800,emission:rel(-30)}},
+    residence:{provided:true,values:{nom:P.nom,prenom:P.prenom,adresse:"Ariana Ville",emission:rel(-20)}}
+  };
+  if(dem==="passeport")return{
+    cin,
+    naissance:{provided:true,values:{nom:bad?"Trabelssi":"Trabelsi",prenom:P.prenom,naissance:P.naissance,emission:rel(-15)}},
+    photos:{provided:true,values:{nombre:bad?1:2,fond:bad?"Couleur":"Blanc",emission:rel(-5)}},
+    timbre:{provided:true,values:{montant:bad?60:RULES.tarifPasseport,emission:rel(-2)}},
+    ancien:{provided:false,values:{}}
+  };
+  return{
+    cin:{provided:true,values:{...cin.values,cin:bad?"09871243":P.cin}},
+    reservation:{provided:true,values:{denom:"Nour Digital",emission:bad?rel(-120):rel(-20)}},
+    statuts:{provided:true,values:{denom:bad?"Nour Digitale":"Nour Digital",nom:P.nom,capital:1000,emission:rel(-5)}},
+    bail:{provided:true,values:{adresse:"Les Berges du Lac, Tunis",duree:bad?6:24,emission:rel(-8)}}
+  };
+}
+
+/* ---------- État ---------- */
+const state={dem:"bourse",docs:{},running:false,last:null,queue:[]};
+const QUEUE0=[
+  {ref:"DP-26-0412",nom:"Ben Salah Ines",dem:"Bourse universitaire",st:"ok",pts:0,d:rel(-1)},
+  {ref:"DP-26-0409",nom:"Gharbi Youssef",dem:"Passeport",st:"block",pts:2,d:rel(-1)},
+  {ref:"DP-26-0405",nom:"Mejri Sarra",dem:"Création de SUARL",st:"warn",pts:1,d:rel(-2)},
+  {ref:"DP-26-0398",nom:"Jaziri Omar",dem:"Bourse universitaire",st:"ok",pts:0,d:rel(-3)},
+  {ref:"DP-26-0391",nom:"Hammami Rania",dem:"Passeport",st:"ok",pts:0,d:rel(-3)},
+  {ref:"DP-26-0388",nom:"Ayari Karim",dem:"Bourse universitaire",st:"block",pts:3,d:rel(-4)}
+];
+let refN=413;
+
+function setProfile(p){["nom","nomar","prenom","naissance","cin"].forEach(k=>{$("p-"+k).value=p[k]||""})}
+function getProfile(){const o={};["nom","nomar","prenom","naissance","cin"].forEach(k=>o[k]=$("p-"+k).value.trim());return o}
+function load(v){
+  const D=DEM[state.dem];
+  if(v==="empty"){state.docs={};D.pieces.forEach(p=>state.docs[p.id]={provided:false,values:{}});setProfile({})}
+  else{state.docs=sample(state.dem,v);setProfile(PROFILE)}
+  renderPieces();resetRun();
+}
+
+/* ---------- Rendu ---------- */
+function renderDemarches(){
+  $("demarches").innerHTML=Object.entries(DEM).map(([k,d])=>`<button class="dem" data-dem="${k}" aria-pressed="${k===state.dem}"><b>${esc(d.label)}</b><small>${esc(d.hint)}</small></button>`).join("");
+}
+function renderPieces(){
+  const D=DEM[state.dem];
+  $("pieces-lead").textContent=`${D.pieces.filter(p=>!p.optional).length} pièces obligatoires pour « ${D.label} ». Les champs simulent ce que l'OCR extrairait de chaque scan.`;
+  $("pieces").innerHTML=D.pieces.map(p=>{
+    const doc=state.docs[p.id]||{provided:false,values:{}};
+    const chip=doc.provided?`<span class="chip ok">Déposée</span>`:(p.optional?`<span class="chip neutral">Facultative</span>`:`<span class="chip block">Manquante</span>`);
+    const fields=doc.provided?`<div class="fields">${p.fields.map(([k,l,t,opts])=>{
+      const val=doc.values[k]==null?"":doc.values[k];const id=`f-${p.id}-${k}`;
+      if(t==="select")return`<label class="f">${esc(l)}<select id="${id}" data-piece="${p.id}" data-field="${k}"><option value=""></option>${opts.map(o=>`<option${o===val?" selected":""}>${esc(o)}</option>`).join("")}</select></label>`;
+      return`<label class="f">${esc(l)}<input id="${id}" data-piece="${p.id}" data-field="${k}" type="${t||"text"}" value="${esc(val)}"${isAr(val)?' class="ar"':""} autocomplete="off"></label>`;
+    }).join("")}</div>${doc.file?`<div class="ocr">Scan « ${esc(doc.file)} » reçu · extraction OCR simulée, vérifiez les champs</div>`:""}`:"";
+    return`<div class="piece${doc.provided?"":" missing"}">
+      <div class="piece-head"><div><h3>${esc(p.label)}</h3><span class="src">${esc(p.src)}${p.maxAge?` · validité ${p.maxAge} j`:""}</span></div>
+      <div class="piece-actions">${chip}<label><input type="checkbox" id="prov-${p.id}" data-provide="${p.id}"${doc.provided?" checked":""}> Fournie</label>
+      <input type="file" id="file-${p.id}" data-file="${p.id}" accept="image/*,.pdf" aria-label="Joindre un scan de ${esc(p.label)}"></div></div>${fields}</div>`;
+  }).join("");
+}
+const STEPS=[
+  ["reception","Réception du dossier","Horodatage, référence attribuée"],
+  ["completude","Contrôle de complétude","Pièces obligatoires présentes"],
+  ["validite","Contrôle de validité","Dates d'émission et d'expiration"],
+  ["coherence","Cohérence croisée","Nom arabe/latin, naissance, CIN"],
+  ["institutions","Vérification institutions","Règles métier, réponses simulées"],
+  ["decision","Décision et notification","Rapport, message au citoyen"],
+  ["rappels","Rappels programmés","Relances et échéances"]
+];
+function renderSteps(status){
+  $("steps").innerHTML=STEPS.map(([k,t,d],i)=>{const s=status[k]||"";return`<li class="${s}"><span class="node">${i+1}</span><span class="t">${t}<span class="d">${d}</span></span><span>${s.includes("has-block")?'<span class="chip block">Bloquant</span>':s.includes("has-warn")?'<span class="chip warn">Alerte</span>':s.includes("done")?'<span class="chip ok">OK</span>':""}</span></li>`}).join("");
+}
+function resetRun(){renderSteps({});$("log").innerHTML="<div>En attente d'un dépôt de dossier…</div>";$("report").innerHTML='<span class="eyebrow">Rapport</span><h2>Résultat du dossier</h2><p class="empty">Le rapport apparaît ici à la fin du workflow.</p>';state.last=null}
+
+/* ---------- Moteur de règles ---------- */
+function analyse(){
+  const D=DEM[state.dem],P=getProfile(),R={},add=(st,sev,msg,act,piece)=>(R[st]=R[st]||[]).push({sev,msg,act,piece});
+  const docs=state.docs,lab=id=>(D.pieces.find(p=>p.id===id)||{}).label;
+  add("reception","ok",`Dossier « ${D.label} » reçu, ${D.pieces.filter(p=>docs[p.id]&&docs[p.id].provided).length} pièce(s) jointe(s)`);
+  if(!P.nom&&!P.nomar)add("reception","block","Identité de référence vide","Renseignez au moins le nom et la date de naissance");
+  // Complétude
+  D.pieces.forEach(p=>{const d=docs[p.id];if(!(d&&d.provided)){if(!p.optional)add("completude","block",`Pièce manquante : ${p.label}`,`Demandez-la auprès de : ${p.src}`,p.id)}
+    else{const empty=p.fields.filter(([k])=>docs[p.id].values[k]===""||docs[p.id].values[k]==null);if(empty.length)add("completude","warn",`${p.label} : ${empty.length} champ(s) illisible(s) ou vide(s)`,"Joignez un scan plus net",p.id)}});
+  if(!R.completude)add("completude","ok","Toutes les pièces obligatoires sont présentes");
+  // Validité
+  const reminders=[];
+  D.pieces.forEach(p=>{const d=docs[p.id];if(!(d&&d.provided))return;const v=d.values;
+    if(p.maxAge&&v.emission){const age=-daysFrom(v.emission);if(age>p.maxAge)add("validite","block",`${p.label} : délivrance trop ancienne, ${age} jours (maximum ${p.maxAge})`,`Demandez un nouvel exemplaire à : ${p.src}`,p.id);
+      else if(age>p.maxAge-15)add("validite","warn",`${p.label} : plus que ${p.maxAge-age} jours de validité`,"Déposez le dossier rapidement",p.id)}
+    if(v.expiration&&p.id!=="ancien"){const n=daysFrom(v.expiration);
+      if(n<0)add("validite","block",`${p.label} expirée depuis le ${fmt(v.expiration)}`,"Renouvelez d'abord ce document",p.id);
+      else if(n<=30){add("validite","warn",`${p.label} expire dans ${n} jours (${fmt(v.expiration)})`,"Le traitement risque de dépasser cette date : anticipez le renouvellement",p.id)}
+      if(n>=0)reminders.push([iso(parse(v.expiration).getTime()-30*DAY),`Rappel : votre ${p.label.toLowerCase()} expire dans 30 jours`])}
+    if(v.emission&&daysFrom(v.emission)>0)add("validite","block",`${p.label} : date dans le futur (${fmt(v.emission)})`,"Corrigez la date saisie",p.id)});
+  if(D.deadline){const dl=rel(D.deadline);add("validite",D.deadline<=7?"warn":"ok",`Date limite de dépôt : ${fmt(dl)} (dans ${D.deadline} jours)`);reminders.push([rel(D.deadline-7),`Rappel : date limite de dépôt le ${fmt(dl)}`])}
+  if(!R.validite)add("validite","ok","Toutes les dates sont valides");
+  // Cohérence
+  D.pieces.forEach(p=>{const d=docs[p.id];if(!(d&&d.provided))return;const v=d.values;
+    if(v.nom){const c=cmpName(v.nom,[P.nom,P.nomar]);
+      if(c==="warn")add("coherence","warn",`${p.label} : nom écrit « ${v.nom} » au lieu de « ${P.nom} »`,"Variante de translittération probable. Demandez une rectification ou joignez une attestation de concordance",p.id);
+      if(c==="block")add("coherence","block",`${p.label} : nom « ${v.nom} » différent de l'identité de référence`,"Vérifiez qu'il s'agit bien de votre document",p.id)}
+    if(v.prenom){const c=cmpName(v.prenom,[P.prenom]);
+      if(c!=="ok")add("coherence",c,`${p.label} : prénom « ${v.prenom} » différent de « ${P.prenom} »`,c==="warn"?"Variante d'orthographe probable":"Vérifiez le prénom inscrit",p.id)}
+    if(v.naissance&&P.naissance&&v.naissance!==P.naissance)add("coherence","block",`${p.label} : naissance au ${fmt(v.naissance)} au lieu du ${fmt(P.naissance)}`,`Erreur de saisie probable : demandez une correction à : ${p.src}`,p.id);
+    if(v.cin&&P.cin&&String(v.cin).replace(/\s/g,"")!==P.cin.replace(/\s/g,""))add("coherence","block",`${p.label} : N° CIN ${v.cin} différent du ${P.cin}`,"Chiffres inversés ? Vérifiez la saisie",p.id)});
+  if(!R.coherence)add("coherence","ok","Noms, dates de naissance et CIN concordent sur toutes les pièces");
+  // Institutions (simulées)
+  const v=id=>(docs[id]&&docs[id].provided)?docs[id].values:null;
+  if(state.dem==="bourse"){const r=v("revenu");if(r&&r.revenu!==""&&r.revenu!=null){if(+r.revenu>RULES.plafondRevenu)add("institutions","warn",`Revenu déclaré ${(+r.revenu).toLocaleString("fr-FR")} DT, au-dessus du plafond paramétré (${RULES.plafondRevenu.toLocaleString("fr-FR")} DT)`,"Éligibilité à confirmer par l'office");else add("institutions","ok","Recette des finances : revenu sous le plafond paramétré")}
+    add("institutions","ok","Université : inscription 2026-2027 confirmée (réponse simulée)")}
+  if(state.dem==="passeport"){const ph=v("photos"),tb=v("timbre");
+    if(ph){if(+ph.nombre<RULES.photosRequises)add("institutions","block",`${ph.nombre||0} photo(s) fournie(s), ${RULES.photosRequises} requises`,"Ajoutez les photos manquantes","photos");if(ph.fond&&ph.fond!=="Blanc")add("institutions","block","Photos sur fond de couleur : fond blanc exigé","Refaites les photos sur fond blanc","photos")}
+    if(tb){if(+tb.montant!==RULES.tarifPasseport)add("institutions","block",`Timbre fiscal de ${tb.montant||0} DT, montant paramétré ${RULES.tarifPasseport} DT`,"Complétez avec un timbre de la différence","timbre");else add("institutions","ok","Recette des finances : timbre valide (réponse simulée)")}
+    if(!v("ancien"))add("institutions","ok","Aucun ancien passeport : traité comme première demande")}
+  if(state.dem==="entreprise"){const rs=v("reservation"),stt=v("statuts"),bl=v("bail");
+    if(rs&&stt&&rs.denom&&stt.denom&&exact(rs.denom)!==exact(stt.denom))add("institutions","block",`Dénomination des statuts « ${stt.denom} » différente de la réservation « ${rs.denom} »`,"Alignez les statuts sur la dénomination réservée","statuts");
+    else if(rs&&stt)add("institutions","ok","Registre : dénomination réservée et statuts concordants (réponse simulée)");
+    if(bl&&bl.duree!==""&&+bl.duree<RULES.bailMin)add("institutions","warn",`Bail de ${bl.duree} mois, durée minimale paramétrée ${RULES.bailMin} mois`,"Faites prolonger le bail ou optez pour une domiciliation","bail")}
+  if(!R.institutions)add("institutions","ok","Aucune règle métier en défaut");
+  const all=Object.values(R).flat(),blocks=all.filter(c=>c.sev==="block"),warns=all.filter(c=>c.sev==="warn");
+  const total=all.length,score=Math.round(100*all.filter(c=>c.sev==="ok").length/Math.max(1,total)+0);
+  const verdict=blocks.length?"block":warns.length?"warn":"ok";
+  R.decision=[{sev:verdict==="block"?"block":"ok",msg:verdict==="block"?`Dossier à corriger : ${blocks.length} point(s) bloquant(s)`:"Dossier transmissible au guichet"}];
+  if(blocks.length)reminders.unshift([rel(3),"Relance automatique si le dossier n'est pas corrigé"]);
+  reminders.sort((a,b)=>a[0]<b[0]?-1:1);
+  R.rappels=[{sev:"ok",msg:`${reminders.length} rappel(s) programmé(s)`}];
+  return{R,blocks,warns,score:Math.round(100*(total-blocks.length-warns.length*.5)/Math.max(1,total)),verdict,reminders,P,D};
+}
+
+/* ---------- Exécution animée du workflow ---------- */
+const reduce=!!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+const wait=ms=>new Promise(r=>setTimeout(r,reduce?60:ms));
+function log(html,cls){const t=new Date().toLocaleTimeString("fr-FR");const div=document.createElement("div");if(cls)div.className=cls;div.innerHTML=`<b>${t}</b> ${html}`;$("log").appendChild(div);$("log").scrollTop=$("log").scrollHeight}
+async function run(){
+  if(state.running)return;state.running=true;$("run").disabled=true;$("run").textContent="Contrôle en cours…";
+  const res=analyse(),status={};$("log").innerHTML="";
+  const ref="DP-26-0"+(refN++);res.ref=ref;
+  for(const [k,t] of STEPS){
+    status[k]="run";renderSteps(status);await wait(520);
+    const checks=res.R[k]||[];
+    const b=checks.some(c=>c.sev==="block"),w=checks.some(c=>c.sev==="warn");
+    if(k==="reception")log(`Dossier ${ref} reçu · ${esc(res.D.label)}`);
+    checks.forEach(c=>{if(k==="reception"&&c.sev==="ok")return;log(esc(c.msg),"e-"+c.sev)});
+    if(k==="institutions")log(`Appels simulés : ${esc(res.D.inst)}, Recette des finances`);
+    status[k]="done"+(b?" has-block":w?" has-warn":"");renderSteps(status);
+  }
+  state.last=res;renderReport(res);
+  state.running=false;$("run").disabled=false;$("run").textContent="Relancer le pré-contrôle";
+}
+function renderReport(r){
+  const P=r.P,name=(P.prenom+" "+P.nom).trim()||"citoyen";
+  const lbl={ok:["Prêt pour le guichet","ok"],warn:["Prêt, avec alertes","warn"],block:["À corriger","block"]}[r.verdict];
+  const issues=[...r.blocks,...r.warns];
+  const msg=r.verdict==="block"
+    ?`Bonjour ${name},\nVotre dossier ${r.ref} (${r.D.label}) n'est pas encore complet.\n${r.blocks.map((b,i)=>`${i+1}. ${b.msg}`).join("\n")}\nCorrigez ces points depuis votre espace, sans vous déplacer. Une relance vous sera envoyée dans 3 jours.\nDossier Prêt`
+    :`Bonjour ${name},\nVotre dossier ${r.ref} (${r.D.label}) est complet et a été transmis au guichet.${r.warns.length?`\nÀ surveiller : ${r.warns.map(w=>w.msg).join(" ; ")}.`:""}\nVous serez prévenu dès qu'un rendez-vous est disponible.\nDossier Prêt`;
+  $("report").innerHTML=`<span class="eyebrow">Rapport · ${esc(r.ref)}</span><h2>Résultat du dossier</h2>
+  <div class="verdict"><div class="stamp ${lbl[1]}">${lbl[0]}<small>${esc(fmt(iso(T0)))} · ${esc(r.D.label)}</small></div>
+  <div class="score">${Math.max(0,r.score)} %<span>indice de préparation · ${r.blocks.length} bloquant(s), ${r.warns.length} alerte(s)</span></div></div>
+  ${issues.length?`<ul class="issues">${issues.map(c=>`<li><span class="chip ${c.sev}">${c.sev==="block"?"Bloquant":"Alerte"}</span><div><div class="msg">${esc(c.msg)}</div>${c.act?`<div class="act">→ ${esc(c.act)}</div>`:""}</div></li>`).join("")}</ul>`:`<p class="empty">Aucun point à corriger.</p>`}
+  <div class="sub"><div class="eyebrow">Notification envoyée au citoyen (SMS / e-mail)</div><div class="msgbox" id="notif">${esc(msg)}</div>
+  <div class="toolbar"><button class="btn" id="copy">Copier le message</button><button class="btn primary" id="send">Envoyer à la vue guichet</button></div></div>
+  <div class="sub"><div class="eyebrow">Rappels programmés</div><ul class="rem">${r.reminders.map(([d,t])=>`<li><span>${fmt(d)}</span><span>${esc(t)}</span></li>`).join("")||"<li><span>—</span><span>Aucun rappel nécessaire</span></li>"}</ul></div>`;
+}
+
+/* ---------- Vue guichet ---------- */
+function renderQueue(){
+  const q=[...state.queue,...QUEUE0];
+  const ok=q.filter(x=>x.st!=="block").length,bl=q.filter(x=>x.st==="block").length;
+  $("kpis").innerHTML=[
+    ["Dossiers reçus",q.length],["Prêts pour le guichet",ok],["Restés chez le citoyen",bl],["Passages évités",bl+" / "+q.length]
+  ].map(([l,v])=>`<div class="kpi"><span class="eyebrow">${l}</span><b>${v}</b></div>`).join("");
+  const st={ok:'<span class="chip ok">Prêt</span>',warn:'<span class="chip warn">Prêt · alertes</span>',block:'<span class="chip block">À corriger</span>'};
+  $("queue").innerHTML=q.map(x=>`<tr class="${x.isNew?"new":""}"><td class="num">${esc(x.ref)}</td><td>${esc(x.nom)}</td><td>${esc(x.dem)}</td><td>${st[x.st]}</td><td class="num">${x.pts}</td><td class="num">${fmt(x.d)}</td></tr>`).join("");
+}
+
+/* ---------- Événements ---------- */
+function showTab(t){document.querySelectorAll("[data-view]").forEach(s=>s.hidden=s.dataset.view!==t);document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));if(t==="guichet")renderQueue()}
+document.querySelector("nav.tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)showTab(b.dataset.tab)});
+$("demarches").addEventListener("click",e=>{const b=e.target.closest("[data-dem]");if(!b||state.running)return;state.dem=b.dataset.dem;renderDemarches();load("bad")});
+$("load-bad").onclick=()=>!state.running&&load("bad");
+$("load-good").onclick=()=>!state.running&&load("good");
+$("load-empty").onclick=()=>!state.running&&load("empty");
+$("run").onclick=run;
+const pc=$("pieces");
+pc.addEventListener("input",e=>{const el=e.target;if(el.dataset.piece){const d=state.docs[el.dataset.piece];d.values[el.dataset.field]=el.type==="number"?(el.value===""?"":+el.value):el.value;el.classList.toggle("ar",isAr(el.value))}});
+pc.addEventListener("change",e=>{const el=e.target;
+  if(el.dataset.provide){const id=el.dataset.provide;state.docs[id]=state.docs[id]||{provided:false,values:{}};state.docs[id].provided=el.checked;renderPieces()}
+  if(el.dataset.file&&el.files&&el.files[0]){const id=el.dataset.file;state.docs[id]=state.docs[id]||{values:{}};state.docs[id].provided=true;state.docs[id].file=el.files[0].name;renderPieces()}
+  if(el.tagName==="SELECT"&&el.dataset.piece)state.docs[el.dataset.piece].values[el.dataset.field]=el.value});
+$("report").addEventListener("click",e=>{
+  if(e.target.id==="copy"){const txt=$("notif").textContent;const done=()=>{e.target.textContent="Message copié"};
+    try{navigator.clipboard.writeText(txt).then(done,()=>{const r=document.createRange();r.selectNodeContents($("notif"));const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent="Texte sélectionné"})}catch(_){}}
+  if(e.target.id==="send"&&state.last){const r=state.last;if(state.queue.some(x=>x.ref===r.ref)){showTab("guichet");return}
+    state.queue.forEach(x=>x.isNew=false);
+    state.queue.unshift({ref:r.ref,nom:(r.P.nom+" "+r.P.prenom).trim()||"—",dem:r.D.label,st:r.verdict,pts:r.blocks.length+r.warns.length,d:iso(T0),isNew:true});
+    e.target.textContent="Envoyé";showTab("guichet")}
+});
+document.addEventListener("input",e=>{if(e.target.id&&e.target.id.startsWith("p-")&&e.target.id==="p-nomar")e.target.classList.add("ar")});
+
+renderDemarches();load("bad");
+window.__DP={skel,cmpName,analyse,state,load};
+})();
+</script>
